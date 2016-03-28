@@ -17,6 +17,12 @@
 #include <stdint.h>
 
 int main( int argc, char* argv[] ) { 
+
+	double diff = 0.0;
+	time_t start;
+    time_t stop;
+    time(&start);
+
 	BMP* bmp;
 	BMP* nova;
 	UCHAR r, g, b; 
@@ -32,12 +38,12 @@ int main( int argc, char* argv[] ) {
 	}
 
 	bmp = BMP_ReadFile( argv[ 1 ] );
-	nova=BMP_ReadFile( "random.bmp");
-	BMP_CHECK_ERROR( stderr, -1 );
-
 	
 	width = BMP_GetWidth( bmp );
 	height = BMP_GetHeight( bmp );
+
+	nova= BMP_Create(width, height, 24);
+	BMP_CHECK_ERROR( stderr, -1 );
 
 	srand ( time(NULL) );
   	
@@ -52,10 +58,19 @@ int main( int argc, char* argv[] ) {
 	int stKorakov;
   	scanf ("%d", &stKorakov);
 
+  	int rdeca = 0;
+  	int modra = 0;
+  	int zelena = 0;
+  	FILE *f;
+  	f = fopen("barve.txt", "a");
   	
   	/* Z zanko se zapeljemo cez vse korake in v vsakem od njih
   	   izvedemo spreminjanje barv */
-  	while(koraki<stKorakov){
+  	//while(koraki<stKorakov){
+  	while(rdeca < width*height && zelena < width*height && modra < width*height) {
+  		rdeca = 0;
+		modra = 0;
+		zelena = 0;
   		for ( y = 0 ; y < height ; y++ )
 		{
 			for ( x = 0 ; x < width ; x++ )
@@ -103,20 +118,33 @@ int main( int argc, char* argv[] ) {
 				BMP_SetPixelRGB( nova, x, y, tabela_sosedov[random_number][0], 
 					tabela_sosedov[random_number][1], 
 					tabela_sosedov[random_number][2]);
+				if((int)tabela_sosedov[random_number][0] == 250) rdeca++;
+				else if ((int)tabela_sosedov[random_number][0] > 0) zelena++;
+				else modra++;
 			}
 		}
+		BMP_WriteFile( nova, argv[2]);
+		BMP_CHECK_ERROR( stdout, -2 );
+
+		//printf("R:%d G:%d B:%d\n", rdeca, zelena, modra);
+		fprintf(f, "%d %d %d\n", rdeca, zelena, modra);
+
 
 		bmp=nova;
   		koraki++;
   	}
 
   	/* Shranimo novo sliko */
-	BMP_WriteFile( nova, argv[ 2 ] );
-	BMP_CHECK_ERROR( stdout, -2 );
+	
 
 	/* Sprostimo spomin */
-	BMP_Free( bmp );
+	BMP_Free(bmp);
 
+	fclose(f);
+
+	time(&stop);
+  	diff = difftime(stop, start);
+  	printf("Runtime: %g\n", diff);
 
 	return 0;
 }

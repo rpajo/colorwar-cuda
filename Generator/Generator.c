@@ -13,7 +13,7 @@ int main(int argc, char const *argv[])
 
 	unsigned int width, height;
 	int rgb[3];
-	printf("Vnesi verjetnosti R, G, B v %\n");
+	printf("Vnesi verjetnosti R, G, B v %%\n");
 	scanf("%d", &rgb[0]);
 	scanf("%d", &rgb[1]);
 	scanf("%d", &rgb[2]);
