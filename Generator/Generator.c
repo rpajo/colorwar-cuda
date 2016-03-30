@@ -34,7 +34,7 @@ int main(int argc, char const *argv[])
 			if(r < rgb[0]) {
 				BMP_SetPixelRGB(bmp, x, y, barve[0][0], barve[0][1], barve[0][2]);
 			}
-			else if(r >= rgb[0] && r <= rgb[0] + rgb[1]){
+			else if(r >= rgb[0] && r < rgb[0] + rgb[1]){
 				BMP_SetPixelRGB(bmp, x, y, barve[1][0], barve[1][1], barve[1][2]);
 			}
 			else {

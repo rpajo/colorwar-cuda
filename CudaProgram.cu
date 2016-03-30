@@ -1,6 +1,4 @@
-#include <stdio.h>
-#include <curand.h>
-//#include <curand_kernel.h>
+#include <stdio.h>v 
 #include <time.h>
 #include <stdlib.h>
 #include <math.h>
@@ -9,59 +7,54 @@
 
 
 __global__
-void process (int *tabela, int*output, int* random, int vrsta, int pixlov, int iteracije) {
+void process (int *tabela, int*output, int* random, int vrsta, int pixlov, int offset) {
 	//__shared__ int tabela[3*vrsta*3];
-	int sosedi[3][4];
-	int i = 0;
-	for(i = 0; i < iteracije; i++) {
-		int stBarv=-1;
-		int	x =  blockIdx.x*blockDim.x*3 + threadIdx.x*3;
-		
-		if((x-3) >= 0){
-			/* Preberemo RGB vrednosti x-1, y pike */
-			stBarv++;
-			sosedi[stBarv][0]= tabela[x-3];
-			sosedi[stBarv][1]= tabela[x-2];
-			sosedi[stBarv][2]= tabela[x-1];
-		}
-					
-		if((x-(vrsta*3)) >= 0){
-			stBarv++;
-			sosedi[stBarv][0]= tabela[x-(vrsta*3)];
-			sosedi[stBarv][1]= tabela[x+1-(vrsta*3)];
-			sosedi[stBarv][2]= tabela[x+2-(vrsta*3)];
-		}
-	
-		if((x+3) < pixlov*3){
-			stBarv++;
-			sosedi[stBarv][0]= tabela[x+3];
-			sosedi[stBarv][1]= tabela[x+4];
-			sosedi[stBarv][2]= tabela[x+5];
-		}
-	
-		if((x+(vrsta*3)) < pixlov*3){
-			stBarv++;
-			sosedi[stBarv][0]= tabela[x+(vrsta*3)];
-			sosedi[stBarv][1]= tabela[x+1+(vrsta*3)];
-			sosedi[stBarv][2]= tabela[x+2+(vrsta*3)];
-		}
-		
-		if(x < pixlov*3) {
-			int ran = random[x]%(stBarv+1);
-			/*output[x + i*pixlov*3] = sosedi[ran][0];
-			output[x+1 + i*pixlov*3] = sosedi[ran][1];
-			output[x+2 + i*pixlov*3] = sosedi[ran][2];*/
-			output[x] = sosedi[ran][0];
-			output[x+1] = sosedi[ran][1];
-			output[x+2] = sosedi[ran][2];
-			__syncthreads();
-			tabela = output;
-			random = random+1;
-			
-			//printf("%d,%d %d %d %d\n", i, x, output[x + i*pixlov*3], output[x+1 + i*pixlov*3], output[x+2 + i*pixlov*3]);
-		}
-		
+	int sosedi[3][4];	
+	int stBarv=-1;
+	int	x =  blockIdx.x*blockDim.x*3 + threadIdx.x*3;
+	//printf("%d\n", x);
+	if(x % vrsta*3 != 0){
+		/* Preberemo RGB vrednosti x-1, y pike */
+		stBarv++;
+		sosedi[0][stBarv]= tabela[x-3];
+		sosedi[1][stBarv]= tabela[x-2];
+		sosedi[2][stBarv]= tabela[x-1];
 	}
+				
+	if(x >= vrsta*3){
+		stBarv++;
+		sosedi[0][stBarv]= tabela[x-(vrsta*3)];
+		sosedi[1][stBarv]= tabela[x+1-(vrsta*3)];
+		sosedi[2][stBarv]= tabela[x+2-(vrsta*3)];
+	}
+
+	if( (x == 0) || (x % ((vrsta)*3) != (vrsta-1)*3)){
+		stBarv++;
+		sosedi[0][stBarv]= tabela[x+3];
+		sosedi[1][stBarv]= tabela[x+4];
+		sosedi[2][stBarv]= tabela[x+5];
+	}
+
+	if(x < pixlov*3 - vrsta*3){
+		stBarv++;
+		sosedi[0][stBarv]= tabela[x+(vrsta*3)];
+		sosedi[1][stBarv]= tabela[x+1+(vrsta*3)];
+		sosedi[2][stBarv]= tabela[x+2+(vrsta*3)];
+	}
+
+	
+	if(x < pixlov*3) {
+		int ran = random[blockIdx.x*blockDim.x + threadIdx.x +offset]%(stBarv+1);
+		//printf("%d\n", ran);
+		output[x] = sosedi[0][ran];
+		output[x+1] = sosedi[1][ran];
+		output[x+2] = sosedi[2][ran];
+		// tabela = output;
+		//printf("%d %d %d %d\n", x, sosedi[ran][0], sosedi[ran][1], sosedi[ran][2]);
+		//printf("pixel: (%d, %d) sosedi: %d r:%d -> %d %d %d\n", blockIdx.x*blockDim.x, threadIdx.x, stBarv+1, ran, output[x], output[x+1], output[x+2]);
+
+	}
+
 }
 
 int main(int argc, char* argv[]) {
@@ -79,7 +72,7 @@ int main(int argc, char* argv[]) {
 	int x, y; 
 
 	printf("Vnesi stevilo iteraciji na GPU:\n");
-	int cudaIteracije;
+	long cudaIteracije;
 	scanf("%d", &cudaIteracije);
 
 	/* Preverimo, če je število vnešenih argumentov pravilno */
@@ -107,14 +100,10 @@ int main(int argc, char* argv[]) {
 	int *cudaOutput;
 
 	tabela1D = (int*)malloc(width*height*3*sizeof(int));
-
 	rezultat = (int*)malloc(width*height*3*sizeof(int));
-
 	random = (int*)malloc(width*height*3*sizeof(int));
-	cudaMalloc(&cudaRandom, width*height*sizeof(int));
-
+	cudaMalloc(&cudaRandom, (cudaIteracije+width*height)*sizeof(int));
 	cudaMalloc(&cudaOutput, width*height*3*sizeof(int));
-
 	cudaMalloc(&cudaInput, width*height*3*sizeof(int));
 
 	//preberi RGB vrednosti vsakega pixla na sliki v 1D tabelo
@@ -130,17 +119,32 @@ int main(int argc, char* argv[]) {
 		}
 	}
 
-	for(j = 0; j < height*width+cudaIteracije+1; j++) {
+	for(j = 0; j < height*width+cudaIteracije; j++) {
 		random[j] = rand();
 	}
 
 	cudaMemcpy(cudaInput, tabela1D, width*height*3*sizeof(int), cudaMemcpyHostToDevice);
-	cudaMemcpy(cudaRandom, random, width*height*sizeof(int), cudaMemcpyHostToDevice);
+	cudaMemcpy(cudaRandom, random, (cudaIteracije + width*height)*sizeof(int), cudaMemcpyHostToDevice);
 
 
+	long i = 0;
+	for(i = 0; i < cudaIteracije; i++) {
+		//printf("iteracija: %d\n", i+1);
+		process<<<height, width>>>(cudaInput, cudaOutput, cudaRandom, width, width*height, i);
 
-	process<<<height, width>>>(cudaInput, cudaOutput, cudaRandom, width, width*height, cudaIteracije);
-
+		cudaMemcpy(rezultat, cudaOutput, width*height*3*sizeof(int), cudaMemcpyDeviceToHost);
+		cudaMemcpy(cudaInput, rezultat, width*height*3*sizeof(int), cudaMemcpyHostToDevice);
+		/*j = 0;
+		for(x = 0; x < height*width*3; x++) {
+			printf("%d ", rezultat[x]);
+			j++;
+			if(j == 3) {
+				j = 0;
+				printf("\n");
+			}
+		}
+		printf("------------------------\n");*/
+	}
 	cudaMemcpy(rezultat, cudaOutput, width*height*3*sizeof(int), cudaMemcpyDeviceToHost);
 
 
@@ -149,15 +153,12 @@ int main(int argc, char* argv[]) {
 	
 	for(y = 0; y < height; y++) {
 		for(x = 0; x < width; x++) {
-			/*printf("%d) %d %d %d\n", j, rezultat[y*width*3+x*3], 
-									rezultat[y*width*3+x*3+1],
-									rezultat[y*width*3+x*3+2]);
-			j+=3;*/
 			BMP_SetPixelRGB(nova, x, y, (unsigned char)rezultat[y*width*3+x*3], 
 										(unsigned char)rezultat[y*width*3+x*3+1], 
 										(unsigned char)rezultat[y*width*3+x*3+2]);
 		}
 	}
+/*
 	j = 0;
 	for(x = 0; x < height*width*3; x++) {
 		printf("%d ", rezultat[x]);
@@ -166,7 +167,8 @@ int main(int argc, char* argv[]) {
 			j = 0;
 			printf("\n");
 		}
-	}
+	}*/
+	
 
 	BMP_WriteFile(nova, argv[2]);
 	BMP_CHECK_ERROR(stdout, -2);
