@@ -123,7 +123,7 @@ int main( int argc, char* argv[] ) {
 				
 				/* Zgeneriramo nakljucno stevilo po modulu, ki je
 				   enak stevilu sosedov */
-				random_number = rand()%stBarv;
+				random_number = rand()%(stBarv + 1);
 				
 				/* Nastavimo RGB vrednost novi sliki */
 				BMP_SetPixelRGB( nova, x, y, tabela_sosedov[random_number][0], 
