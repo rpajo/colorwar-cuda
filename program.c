@@ -66,8 +66,8 @@ int main( int argc, char* argv[] ) {
   	
   	/* Z zanko se zapeljemo cez vse korake in v vsakem od njih
   	   izvedemo spreminjanje barv */
-  	//while(koraki<stKorakov){
-  	while(rdeca < width*height && zelena < width*height && modra < width*height) {
+  	while(koraki<stKorakov){
+  	//while(rdeca < width*height && zelena < width*height && modra < width*height) {
   		rdeca = 0;
 		modra = 0;
 		zelena = 0;
