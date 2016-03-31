@@ -1,4 +1,4 @@
-#include <stdio.h>v 
+#include <stdio.h>
 #include <time.h>
 #include <stdlib.h>
 #include <math.h>
@@ -13,6 +13,7 @@ void process (int *tabela, int*output, int* random, int vrsta, int pixlov, int o
 	int stBarv=-1;
 	int	x =  blockIdx.x*blockDim.x*3 + threadIdx.x*3;
 	//printf("%d\n", x);
+	__syncthreads();
 	if(x % vrsta*3 != 0){
 		/* Preberemo RGB vrednosti x-1, y pike */
 		stBarv++;
@@ -44,15 +45,17 @@ void process (int *tabela, int*output, int* random, int vrsta, int pixlov, int o
 
 	
 	if(x < pixlov*3) {
-		int ran = random[blockIdx.x*blockDim.x + threadIdx.x +offset]%(stBarv+1);
-		//printf("%d\n", ran);
+		int ran = random[blockIdx.x*blockDim.x + threadIdx.x + offset]%(stBarv+1);
 		output[x] = sosedi[0][ran];
 		output[x+1] = sosedi[1][ran];
 		output[x+2] = sosedi[2][ran];
+		//printf("%d\n", ran);
 		// tabela = output;
-		//printf("%d %d %d %d\n", x, sosedi[ran][0], sosedi[ran][1], sosedi[ran][2]);
-		//printf("pixel: (%d, %d) sosedi: %d r:%d -> %d %d %d\n", blockIdx.x*blockDim.x, threadIdx.x, stBarv+1, ran, output[x], output[x+1], output[x+2]);
-
+		/*printf("pixel: (%d, %d) r:%d sosedi: %d ->  [%d %d %d; %d %d %d; %d %d %d; %d %d %d] -> [%d %d %d]\n", blockIdx.x*blockDim.x, threadIdx.x, ran, stBarv+1,
+			sosedi[0][0], sosedi[1][0], sosedi[2][0], sosedi[0][1], sosedi[1][1], sosedi[2][1], 
+			sosedi[0][2], sosedi[1][2], sosedi[2][2], sosedi[0][3], sosedi[1][3], sosedi[2][3],
+			output[x], output[x+1], output[x+2]);
+		*/
 	}
 
 }
@@ -73,7 +76,7 @@ int main(int argc, char* argv[]) {
 
 	printf("Vnesi stevilo iteraciji na GPU:\n");
 	long cudaIteracije;
-	scanf("%d", &cudaIteracije);
+	scanf("%ld", &cudaIteracije);
 
 	/* Preverimo, če je število vnešenih argumentov pravilno */
 	if ( argc != 3 )
@@ -128,6 +131,9 @@ int main(int argc, char* argv[]) {
 
 
 	long i = 0;
+	char name[64];
+	char datoteka[64];
+	int counter = 1;
 	for(i = 0; i < cudaIteracije; i++) {
 		//printf("iteracija: %d\n", i+1);
 		process<<<height, width>>>(cudaInput, cudaOutput, cudaRandom, width, width*height, i);
@@ -144,6 +150,25 @@ int main(int argc, char* argv[]) {
 			}
 		}
 		printf("------------------------\n");*/
+
+		nova = BMP_Create(width, height, 24);
+
+		if(i != 0 && i%5 == 0 ) {
+			for(y = 0; y < height; y++) {
+				for(x = 0; x < width; x++) {
+					BMP_SetPixelRGB(nova, x, y, (unsigned char)rezultat[y*width*3+x*3], 
+												(unsigned char)rezultat[y*width*3+x*3+1], 
+												(unsigned char)rezultat[y*width*3+x*3+2]);
+				}
+			}
+	
+			strcpy(name, "Izhodi/");
+			sprintf(datoteka, "%d", i);
+			strcat(name, datoteka);
+			strcat(name, ".bmp");
+	
+			BMP_WriteFile( nova, name);
+			}
 	}
 	cudaMemcpy(rezultat, cudaOutput, width*height*3*sizeof(int), cudaMemcpyDeviceToHost);
 
@@ -158,17 +183,6 @@ int main(int argc, char* argv[]) {
 										(unsigned char)rezultat[y*width*3+x*3+2]);
 		}
 	}
-/*
-	j = 0;
-	for(x = 0; x < height*width*3; x++) {
-		printf("%d ", rezultat[x]);
-		j++;
-		if(j == 3) {
-			j = 0;
-			printf("\n");
-		}
-	}*/
-	
 
 	BMP_WriteFile(nova, argv[2]);
 	BMP_CHECK_ERROR(stdout, -2);
