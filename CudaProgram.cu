@@ -178,6 +178,7 @@ int main(int argc, char* argv[]) {
 			}
 
 			strcpy(name, "Vojne/izhodi/");
+			strcpy(name, "Izhodi/");
 			sprintf(datoteka, "%d", i);
 			strcat(name, datoteka);
 			strcat(name, ".bmp");
