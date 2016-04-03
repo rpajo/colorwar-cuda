@@ -7,9 +7,9 @@ for i = 1 : length(srcFiles)
     imshow(I);
     pause(0.2)
     figure(2)
-    plot(barve(1:i*100, 1), 'r');
+    plot(barve(1:i, 1), 'r');
     hold on
-    plot(barve(1:i*100, 2), 'g');
-    plot(barve(1:i*100, 3), 'b');
+    plot(barve(1:i, 2), 'g');
+    plot(barve(1:i, 3), 'b');
     %figure, imshow(I);
 end
