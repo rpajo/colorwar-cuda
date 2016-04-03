@@ -8,24 +8,24 @@
 
 __global__
 void process (int *tabela, int*output, int* random, int vrsta, int pixlov, int offset) {
-	int sosedi[3][4];	
+	int sosedi[3][4];
 	int stBarv=-1;
 	// x - index pixla -> Blok(vrsta) * število niti v bloku(širina) + zaporedna nit v vrsti
 	int	x =  blockIdx.x*blockDim.x*3 + threadIdx.x*3;
-	
+
 	//sinhronizacija niti - verjentu nepotrebna
 	__syncthreads();
 
 	// Iskanje levega pixla
-	if(x % vrsta*3 != 0){
+	if((x % (vrsta * 3)) != 0){
 		stBarv++;
 		sosedi[0][stBarv]= tabela[x-3];
 		sosedi[1][stBarv]= tabela[x-2];
 		sosedi[2][stBarv]= tabela[x-1];
 	}
-		
-	// Iskanje zgornjega pixla		
-	if(x >= vrsta*3){
+
+	// Iskanje zgornjega pixla
+	if(x >= (vrsta * 3)){
 		stBarv++;
 		sosedi[0][stBarv]= tabela[x-(vrsta*3)];
 		sosedi[1][stBarv]= tabela[x+1-(vrsta*3)];
@@ -33,7 +33,8 @@ void process (int *tabela, int*output, int* random, int vrsta, int pixlov, int o
 	}
 
 	// Iskanje desnega pixla
-	if( (x == 0) || (x % ((vrsta)*3) != (vrsta-1)*3)){
+	//if( (x == 0) || (x % ((vrsta)*3) != (vrsta-1)*3)){
+	if (((x + 3) % (vrsta * 3)) != 0) {
 		stBarv++;
 		sosedi[0][stBarv]= tabela[x+3];
 		sosedi[1][stBarv]= tabela[x+4];
@@ -41,7 +42,8 @@ void process (int *tabela, int*output, int* random, int vrsta, int pixlov, int o
 	}
 
 	// Iskanje spodnjega pixla
-	if(x < pixlov*3 - vrsta*3){
+	//if(x < ((pixlov * 3) - (vrsta * 3))){
+	if (x < ((vrsta - 1) * (vrsta * 3))) {
 		stBarv++;
 		sosedi[0][stBarv]= tabela[x+(vrsta*3)];
 		sosedi[1][stBarv]= tabela[x+1+(vrsta*3)];
@@ -59,7 +61,7 @@ void process (int *tabela, int*output, int* random, int vrsta, int pixlov, int o
 
 		// Izpis za debuggiranje
 		/*printf("pixel: (%d, %d) r:%d sosedi: %d ->  [%d %d %d; %d %d %d; %d %d %d; %d %d %d] -> [%d %d %d]\n", blockIdx.x*blockDim.x, threadIdx.x, ran, stBarv+1,
-			sosedi[0][0], sosedi[1][0], sosedi[2][0], sosedi[0][1], sosedi[1][1], sosedi[2][1], 
+			sosedi[0][0], sosedi[1][0], sosedi[2][0], sosedi[0][1], sosedi[1][1], sosedi[2][1],
 			sosedi[0][2], sosedi[1][2], sosedi[2][2], sosedi[0][3], sosedi[1][3], sosedi[2][3],
 			output[x], output[x+1], output[x+2]);
 		*/
@@ -78,9 +80,9 @@ int main(int argc, char* argv[]) {
 
 	BMP* bmp;
 	BMP* nova;
-	unsigned char r, g, b; 
-	int width, height; 
-	int x, y; 
+	unsigned char r, g, b;
+	int width, height;
+	int x, y;
 
 	printf("Vnesi stevilo iteraciji na GPU:\n");
 	long cudaIteracije;
@@ -96,7 +98,7 @@ int main(int argc, char* argv[]) {
 
 	bmp = BMP_ReadFile( argv[ 1 ] );
 	//BMP_CHECK_ERROR( stderr, -1 );
-	
+
 	width = BMP_GetWidth( bmp );
 	height = BMP_GetHeight( bmp );
 
@@ -169,17 +171,17 @@ int main(int argc, char* argv[]) {
 			nova = BMP_Create(width, height, 24);
 			for(y = 0; y < height; y++) {
 				for(x = 0; x < width; x++) {
-					BMP_SetPixelRGB(nova, x, y, (unsigned char)rezultat[y*width*3+x*3], 
-												(unsigned char)rezultat[y*width*3+x*3+1], 
+					BMP_SetPixelRGB(nova, x, y, (unsigned char)rezultat[y*width*3+x*3],
+												(unsigned char)rezultat[y*width*3+x*3+1],
 												(unsigned char)rezultat[y*width*3+x*3+2]);
 				}
 			}
-	
-			strcpy(name, "Izhodi/");
+
+			strcpy(name, "Vojne/izhodi/");
 			sprintf(datoteka, "%d", i);
 			strcat(name, datoteka);
 			strcat(name, ".bmp");
-	
+
 			BMP_WriteFile( nova, name);
 			}
 	}
@@ -190,11 +192,11 @@ int main(int argc, char* argv[]) {
 
 	nova = BMP_Create(width, height, 24);
 
-	
+
 	for(y = 0; y < height; y++) {
 		for(x = 0; x < width; x++) {
-			BMP_SetPixelRGB(nova, x, y, (unsigned char)rezultat[y*width*3+x*3], 
-										(unsigned char)rezultat[y*width*3+x*3+1], 
+			BMP_SetPixelRGB(nova, x, y, (unsigned char)rezultat[y*width*3+x*3],
+										(unsigned char)rezultat[y*width*3+x*3+1],
 										(unsigned char)rezultat[y*width*3+x*3+2]);
 		}
 	}
