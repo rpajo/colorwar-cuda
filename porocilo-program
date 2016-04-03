@@ -1,20 +1,18 @@
-POROCILO MM-program
-
+MATEMATIČNO MODELIRANJE
+Projektna naloga:
 Vojna barv
 
-blabla tocka:) Predstavitev problema in program
-
 Problem, s katerim smo se ukvarjali v naši skupini,
-je bilo mešanje barv. Natančneje, spreminjanje barv točk slike,
-glede na njene sosede. Na primer, če je določena točka poljubne barve,
+je bila vojna barv. Natančneje, spreminjanje barv na vsaki točki slike,
+glede na njene sosede. Če je določena točka poljubne barve,
 ima pa dva soseda modre in po enega zelene in rdeče barve,
 se bo točka v naslednjem koraku z 50% verjetnostjo obarvala modro,
 z 25% pa zeleno oz. rdeče. ((morda dodajanje slik?!)).
 Naša naloga je torej bila, sestaviti algoritem in ga pretvoriti v program,
 ki bo prebral poljubno sliko, in na njej omenjeno prebarvanje izvajal toliko časa,
-dokler ne bo ena barva prevladala.
+dokler ne bo ena barva prevladala (zasedenost vseh točk slike bo samo ene barve).
 
-Program načeloma sicer ni programersko zahteven,
+Program načeloma sicer ni programersko zahteven, (???)
 vendar pa je potrebno skrbno izbrati primeren programski jezik,
 saj v obratnem primeru kaj hitro pride do težav,
 če želimo nad njim dodatno operirati. V našem primeru je šlo za paralelizacijo
