@@ -11,5 +11,6 @@ for i = 1 : length(srcFiles)
     hold on
     plot(barve(1:i, 2), 'g');
     plot(barve(1:i, 3), 'b');
+    plot(barve(1:i, 4), 'y');
     %figure, imshow(I);
 end
