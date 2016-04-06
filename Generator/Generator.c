@@ -22,7 +22,7 @@ int main(int argc, char const *argv[])
 	scanf("%u", &width);
 	scanf("%u", &height);
 
-	unsigned char barve[3][3] = {{250, 0, 0}, {124, 252, 0}, {0, 0, 255}};
+	unsigned char barve[4][3] = {{250, 0, 0}, {124, 252, 0}, {0, 0, 255}, {255, 128, 0}};
 	srand(time(NULL));
 
 	bmp = BMP_Create(width, height, 24);
@@ -36,6 +36,9 @@ int main(int argc, char const *argv[])
 			}
 			else if(r >= rgb[0] && r < rgb[0] + rgb[1]){
 				BMP_SetPixelRGB(bmp, x, y, barve[1][0], barve[1][1], barve[1][2]);
+			}
+			else if (r>=rgb[0]+rgb[1] && r< rgb[0]+rgb[1]+rgb[2]){
+				BMP_SetPixelRGB(bmp, x, y, barve[3][0], barve[3][1], barve[3][2]);
 			}
 			else {
 				BMP_SetPixelRGB(bmp, x, y, barve[2][0], barve[2][1], barve[2][2]);

@@ -61,6 +61,7 @@ int main( int argc, char* argv[] ) {
   	int rdeca = 0;
   	int modra = 0;
   	int zelena = 0;
+	int orazna=0;
   	FILE *f;
   	f = fopen("barve.txt", "a");
   	
@@ -71,6 +72,7 @@ int main( int argc, char* argv[] ) {
   		rdeca = 0;
 		modra = 0;
 		zelena = 0;
+		orazna=0;
   		for ( y = 0 ; y < height ; y++ )
 		{
 			for ( x = 0 ; x < width ; x++ )
@@ -119,7 +121,8 @@ int main( int argc, char* argv[] ) {
 					tabela_sosedov[random_number][1], 
 					tabela_sosedov[random_number][2]);
 				if((int)tabela_sosedov[random_number][0] == 250) rdeca++;
-				else if ((int)tabela_sosedov[random_number][0] > 0) zelena++;
+				else if ((int)tabela_sosedov[random_number][0] > 0 &&random_number][0] < 150) zelena++;
+				else if ((int)tabela_sosedov[random_number][0]> 200) oranzna++;
 				else modra++;
 			}
 		}
@@ -127,7 +130,7 @@ int main( int argc, char* argv[] ) {
 		BMP_CHECK_ERROR( stdout, -2 );
 
 		//printf("R:%d G:%d B:%d\n", rdeca, zelena, modra);
-		fprintf(f, "%d %d %d\n", rdeca, zelena, modra);
+		fprintf(f, "%d %d %d %d\n", rdeca, zelena, modra, oranzna);
 
 
 		bmp=nova;
