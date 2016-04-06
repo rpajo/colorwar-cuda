@@ -12,21 +12,22 @@ Naša naloga je torej bila, sestaviti algoritem in ga pretvoriti v program,
 ki bo prebral poljubno sliko, in na njej omenjeno prebarvanje izvajal toliko časa,
 dokler ne bo ena barva prevladala (zasedenost vseh točk slike bo samo ene barve).
 
-Program načeloma sicer ni programersko zahteven, (???)
-vendar pa je potrebno skrbno izbrati primeren programski jezik,
-saj v obratnem primeru kaj hitro pride do težav,
-če želimo nad njim dodatno operirati. V našem primeru je šlo za paralelizacijo
-na grafičnem procesorju s programom Cuda. Po prebiranju internetnih virov
-in posvetu z mentorjem Žigo Lesarjem smo se odločili, za pisanje v
-programskem jeziku C.
+Kot že piše v navodilih, naša naloga ni bila matematično zahtevna, saj je
+matrika z našimi slikovnimi točkami predstavljena kot markovska veriga z nˆ2 polji,
+b barv in bˆ(nˆ2) stanji. Glede na začetno stanje barv, zmaga v večini primerov
+barva, ki je zasedala največje število slikovnih pik, v začetnem stanju.
 
-Ker pa sam C ne podpira branja slik (odločili smo se, da se posvetimo .bmp formatu),
-je bilo potrebno najprej poiskati knjižnico, ki nam bi to omogočala.
-Na internetu smo našli knjižnico QDBMP avtorja Chai Braudo
-in jo tudi uporabili za naš program. Knjižnjica nam je delo
-precej olajšala, zato smo sam osnovni program lahko zapisali
-v precej enostavni obliki. V enem obhodu smo se zapeljali čez
-vse slikovne pike, preverili njene sosede in glede na njihovo
-pogostost s funkcijo random() spremenili njeno barvo (oblika RGB).
-Obhode smo nato ponavljali toliko časa, dokler ni prevladala ena barva
-oz. smo podali po koliko obhodih naj se zaključi (pred izvajanjem se poljubno izbere).
+Potrebno je bilo izbrati ustrezen programski jezik, v katerem smo se primerno
+lotili našega problema, zato smo izbrali programski jezik C.
+V našem primeru je šlo za paralelizacijo na grafičnem procesorju
+s programom Cuda.
+
+Za začetek smo se odločili, da bomo v programu uporabljali format slike .bmp,
+kateremu dokaj preprosto spreminjamo zapis barv po treh komponentah, RGB (rdeča,
+zelena in modra). Ker pa sam C ne podpira branja slik, smo si pomagali
+s knjižnico QDBMP avtorja Chai Braudo. V enem obhodu smo se zapeljali čez
+vse slikovne pike, preverili njihove sosede in glede na njihovo
+pogostost, nato s funkcijo random() spremenili njeno barvo (kot že omenjeno,
+po treh komponentah, RGB). Obhode smo nato ponavljali toliko časa,
+dokler ni prevladala ena barva oz. smo podali po koliko obhodih naj se zaključi
+(pred izvajanjem se poljubno izbere).
