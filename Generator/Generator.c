@@ -12,11 +12,12 @@ int main(int argc, char const *argv[])
 	BMP*	bmp;
 
 	unsigned int width, height;
-	int rgb[3];
+	int rgb[4];
 	printf("Vnesi verjetnosti R, G, B v %%\n");
 	scanf("%d", &rgb[0]);
 	scanf("%d", &rgb[1]);
 	scanf("%d", &rgb[2]);
+	scanf("%d", &rgb[3]);
 
 	printf("Vnesi sirino in visino:\n");
 	scanf("%u", &width);
@@ -37,11 +38,11 @@ int main(int argc, char const *argv[])
 			else if(r >= rgb[0] && r < rgb[0] + rgb[1]){
 				BMP_SetPixelRGB(bmp, x, y, barve[1][0], barve[1][1], barve[1][2]);
 			}
-			else if (r>=rgb[0]+rgb[1] && r< rgb[0]+rgb[1]+rgb[2]){
-				BMP_SetPixelRGB(bmp, x, y, barve[3][0], barve[3][1], barve[3][2]);
+			else if (r>=rgb[0]+rgb[1] && r<rgb[0] + rgb[1] + rgb[2]){
+				BMP_SetPixelRGB(bmp, x, y, barve[2][0], barve[2][1], barve[2][2]);
 			}
 			else {
-				BMP_SetPixelRGB(bmp, x, y, barve[2][0], barve[2][1], barve[2][2]);
+				BMP_SetPixelRGB(bmp, x, y, barve[3][0], barve[3][1], barve[3][2]);
 			}
 		}
 	}
